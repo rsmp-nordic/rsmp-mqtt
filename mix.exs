@@ -3,7 +3,7 @@ defmodule RSMP.MixProject do
 
   def project do
     [
-      app: :rsmp_mqtt,
+      app: :rsmp,
       version: "0.1.0",
       elixir: "~> 1.15",
       start_permanent: Mix.env() == :prod,
@@ -14,14 +14,15 @@ defmodule RSMP.MixProject do
   # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger]
+      extra_applications: [:logger],
+      mod: {RSMP.Application, []}
     ]
   end
 
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:exmqtt, github: "ryanwinchester/exmqtt", branch: "master"}
+      {:emqtt, github: "emqx/emqtt", tag: "1.4.4", system_env: [{"BUILD_WITHOUT_QUIC", "1"}]}
     ]
   end
 end
