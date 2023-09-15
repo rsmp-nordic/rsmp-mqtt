@@ -4,24 +4,26 @@ An Elixir app to investigate the possibility of building RSMP 4 on top of MQTT.
 ## Prerequisites
 Elixir >= 1.15.
 
+NOTE: The emqtt libriary is currently incompatible with the latest Erlang OTP 26. Instead you must install Erlang OPT 25, and a version of Elixir is compiled with that OTP version. The easiest way to do this is to install Erlang and Elixir with asdf. If you downgrade OTP, you might need to remove all project dependencies and reinstall.
+
 To install dependencies:
-```shell
+```sh
 % mix deps.get
 ```
 
 ## Runnning
-```shell
+```sh
 % mix run
 ```
 
 ## Broker
 Run the EMQX MQTT broker in a docker container, from https://www.emqx.io:
 
-docker run -d --name emqx -p 1883:1883 -p 8083:8083 -p 8084:8084 -p 8883:8883 -p 18083:18083 emqx/emqx
+docker run -d --name emqx -p 1883:1883 emqx/emqx
 
 ## MQTT library
-EXMQTT is an Elixir wrapper around the emqtt Erlang MQTT library:
-https://github.com/ryanwinchester/exmqtt
+emqtt is an Erlang MQTT library (Erlang can be used in Elixir).
+
 
 
 
