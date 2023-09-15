@@ -1,28 +1,39 @@
 # About
 An Elixir app to investigate the possibility of building RSMP 4 on top of MQTT.
 
+Initial code from:
+https://www.emqx.com/en/blog/mqtt-for-elixir
+
+
+
 ## Prerequisites
-Elixir >= 1.15.
+Elixir >= 1.15
+Erlang 25 (not 26)
 
-NOTE: The emqtt libriary is currently incompatible with the latest Erlang OTP 26. Instead you must install Erlang OPT 25, and a version of Elixir is compiled with that OTP version. The easiest way to do this is to install Erlang and Elixir with asdf. If you downgrade OTP, you might need to remove all project dependencies and reinstall.
+## Dependencies
+emqtt is an Erlang MQTT library (Erlang can be used in Elixir).
 
-To install dependencies:
+NOTE: The emqtt libriary is currently incompatible with the latest Erlang 26. Instead you must install Erlang 25, and a version of Elixir is compiled with that OTP version. The easiest way to do this is to install Erlang and Elixir with asdf, see e.g:
+https://www.pluralsight.com/guides/installing-elixir-erlang-with-asdf
+
+If you downgrade an existing Erlang 26, you might need to remove all project dependencies and reinstall.
+
+To install dependencies (once elixir and erlang is installed):
 ```sh
 % mix deps.get
 ```
 
-## Runnning
+## Run Broker
+Run the EMQX mqtt broker in a docker container, see https://www.emqx.io:
+
 ```sh
-% mix run
+docker run -d --name emqx -p 1883:1883 emqx/emqx
 ```
 
-## Broker
-Run the EMQX MQTT broker in a docker container, from https://www.emqx.io:
-
-docker run -d --name emqx -p 1883:1883 emqx/emqx
-
-## MQTT library
-emqtt is an Erlang MQTT library (Erlang can be used in Elixir).
+## Run app
+```sh
+% mix run --no-halt
+```
 
 
 
