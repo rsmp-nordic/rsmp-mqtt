@@ -18,8 +18,16 @@ defmodule RSMP do
     status = "temperature"
     status_topic = "status/#{id}/#{component}/#{module}/#{status}"
 
-    options = emqtt_opts ++ [will_topic: "died/#{id}"]
+    options =
+      emqtt_opts ++
+        [
+          will_topic: "state/#{id}",
+          will_payload: :erlang.term_to_binary(0),
+          will_retain: true
+        ]
+
     {:ok, pid} = :emqtt.start_link(options)
+
     state = %{
       interval: interval,
       timer: nil,
@@ -40,13 +48,15 @@ defmodule RSMP do
     {:ok, _, _} = :emqtt.subscribe(pid, {"command/#{clientid}/plan", 1})
 
     # say hello
-    topic = "hello/#{clientid}"
-    payload = :erlang.term_to_binary(nil)
-    :emqtt.publish(pid, topic, payload, retain: true)
+    :emqtt.publish(
+      pid,
+      "state/#{clientid}",
+      :erlang.term_to_binary(1),
+      retain: true
+    )
 
     {:noreply, state}
   end
-
 
   def handle_info(:tick, %{status_topic: topic, pid: pid} = state) do
     status_temperature(pid, topic)
@@ -75,6 +85,7 @@ defmodule RSMP do
     if state.timer do
       Process.cancel_timer(state.timer)
     end
+
     timer = Process.send_after(self(), :tick, state.interval)
     %{state | timer: timer}
   end
