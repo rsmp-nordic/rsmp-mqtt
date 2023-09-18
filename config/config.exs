@@ -3,7 +3,7 @@ import Config
 config :rsmp, :emqtt,
   host: '127.0.0.1',
   port: 1883,
-  clientid: "rsmp",
+  clientid: "tlc_582a",
   clean_start: false,
   name: :emqtt,
   proto_ver: :v5
