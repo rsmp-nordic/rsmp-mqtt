@@ -13,7 +13,10 @@ Erlang 25 (not 26)
 ## Dependencies
 emqtt is an Erlang MQTT library (Erlang can be used in Elixir).
 
-NOTE: The emqtt libriary is currently incompatible with the latest Erlang 26. Instead you must install Erlang 25, and a version of Elixir is compiled with that OTP version. The easiest way to do this is to install Erlang and Elixir with asdf, see e.g:
+NOTE: The emqtt libriary is currently incompatible with the latest Erlang 26, see:
+https://github.com/emqx/emqtt/pull/196
+
+Instead you must install Erlang 25, and a version of Elixir is compiled with that OTP version. The easiest way to do this is to install Erlang and Elixir with asdf, see e.g:
 https://www.pluralsight.com/guides/installing-elixir-erlang-with-asdf
 
 If you downgrade an existing Erlang 26, you might need to remove all project dependencies and reinstall.
