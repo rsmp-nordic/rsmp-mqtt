@@ -60,17 +60,20 @@ defmodule RSMP do
 
   def handle_info(:tick, %{status_topic: topic, pid: pid} = state) do
     status_temperature(pid, topic)
-    {:noreply, set_timer(state)}
+    #{:noreply, set_timer(state)}
+    {:noreply, state}
   end
 
   def handle_info({:publish, publish}, state) do
+    IO.inspect(publish)
     handle_publish(parse_topic(publish), publish, state)
   end
 
   defp handle_publish(["command", _, "plan"], %{payload: payload}, state) do
     new_state = %{state | plan: String.to_integer(payload)}
     Logger.info("Switching to plan: #{new_state[:plan]}")
-    {:noreply, set_timer(new_state)}
+    #{:noreply, set_timer(new_state)}
+    {:noreply, new_state}
   end
 
   defp handle_publish(_, _, state) do
