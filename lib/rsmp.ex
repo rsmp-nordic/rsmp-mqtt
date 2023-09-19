@@ -58,20 +58,28 @@ defmodule RSMP do
     {:noreply, state}
   end
 
-  def handle_info(:tick, %{status_topic: topic, pid: pid} = state) do
-    status_temperature(pid, topic)
+  def handle_info(:tick, %{status_topic: _topic, pid: _pid} = state) do
+    #status_temperature(pid, topic)
     #{:noreply, set_timer(state)}
     {:noreply, state}
   end
 
   def handle_info({:publish, publish}, state) do
-    IO.inspect(publish)
+    #IO.inspect(publish)
     handle_publish(parse_topic(publish), publish, state)
   end
 
-  defp handle_publish(["command", _, "plan"], %{payload: payload}, state) do
+  defp handle_publish(["command", _, "plan"], %{payload: payload, properties: properties}, state) do
     new_state = %{state | plan: String.to_integer(payload)}
     Logger.info("Switching to plan: #{new_state[:plan]}")
+
+    response_topic = properties[:"Response-Topic"]
+    pid = state[:pid]
+    response_message = :ok
+    response_payload = :erlang.term_to_binary(response_message)
+    :emqtt.publish(state[:pid], response_topic, response_payload)
+
+
     #{:noreply, set_timer(new_state)}
     {:noreply, new_state}
   end
