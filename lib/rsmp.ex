@@ -59,28 +59,53 @@ defmodule RSMP do
   end
 
   def handle_info(:tick, %{status_topic: _topic, pid: _pid} = state) do
-    #status_temperature(pid, topic)
-    #{:noreply, set_timer(state)}
+    # status_temperature(pid, topic)
+    # {:noreply, set_timer(state)}
     {:noreply, state}
   end
 
   def handle_info({:publish, publish}, state) do
-    #IO.inspect(publish)
+    # IO.inspect(publish)
     handle_publish(parse_topic(publish), publish, state)
   end
 
-  defp handle_publish(["command", _, "plan"], %{payload: payload, properties: properties}, state) do
+  defp handle_publish(
+         ["command", _, "plan" = command],
+         %{payload: payload, properties: properties},
+         state
+       ) do
     new_state = %{state | plan: String.to_integer(payload)}
-    Logger.info("Switching to plan: #{new_state[:plan]}")
 
-    response_topic = properties[:"Response-Topic"]
     pid = state[:pid]
+    response_topic = properties[:"Response-Topic"]
+    command_id = properties[:"Correlation-Data"]
     response_message = :ok
     response_payload = :erlang.term_to_binary(response_message)
-    :emqtt.publish(state[:pid], response_topic, response_payload)
 
+    properties = %{
+      "Correlation-Data": command_id
+    }
 
-    #{:noreply, set_timer(new_state)}
+    Logger.info(
+      "Received '#{command}' command #{command_id}: Switching to plan: #{new_state[:plan]}"
+    )
+
+    {:ok, pkt_id} =
+      :emqtt.publish(
+        # Client
+        pid,
+        # Topic
+        response_topic,
+        # Properties
+        properties,
+        # Payload
+        response_payload,
+        # Opts
+        retain: false,
+        qos: 1
+      )
+
+    # {:noreply, set_timer(new_state)}
     {:noreply, new_state}
   end
 
