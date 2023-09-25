@@ -38,6 +38,8 @@ docker run -d --name emqx -p 1883:1883 emqx/emqx
 % mix run --no-halt
 ```
 
+## Troubleshooting
+If you get the error `Application rsmp exited: shutdown`, then please check that the broker is running and reachable on port 1883 - see above.
 
 
 

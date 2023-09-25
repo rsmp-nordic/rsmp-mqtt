@@ -79,31 +79,34 @@ defmodule RSMP do
     pid = state[:pid]
     response_topic = properties[:"Response-Topic"]
     command_id = properties[:"Correlation-Data"]
-    response_message = :ok
-    response_payload = :erlang.term_to_binary(response_message)
-
-    properties = %{
-      "Correlation-Data": command_id
-    }
 
     Logger.info(
       "Received '#{command}' command #{command_id}: Switching to plan: #{new_state[:plan]}"
     )
 
-    {:ok, pkt_id} =
-      :emqtt.publish(
-        # Client
-        pid,
-        # Topic
-        response_topic,
-        # Properties
-        properties,
-        # Payload
-        response_payload,
-        # Opts
-        retain: false,
-        qos: 1
-      )
+    if response_topic && command_id do
+      response_message = :ok
+      response_payload = :erlang.term_to_binary(response_message)
+
+      properties = %{
+        "Correlation-Data": command_id
+      }
+
+      {:ok, _pkt_id} =
+        :emqtt.publish(
+          # Client
+          pid,
+          # Topic
+          response_topic,
+          # Properties
+          properties,
+          # Payload
+          response_payload,
+          # Opts
+          retain: false,
+          qos: 1
+        )
+    end
 
     # {:noreply, set_timer(new_state)}
     {:noreply, new_state}
