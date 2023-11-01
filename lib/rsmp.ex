@@ -7,10 +7,10 @@ defmodule RSMP do
 
   def start_link([]) do
     {:ok, pid} = GenServer.start_link(__MODULE__, [])
-    Logger.info( "Starting RSMP with pid #{inspect(pid)}")
-    
+    Logger.info("Starting RSMP with pid #{inspect(pid)}")
+
     # So you can do `:sys.get_state(RSMP)` in iex:
-    Process.register( pid, RSMP)
+    Process.register(pid, RSMP)
 
     {:ok, pid}
   end
@@ -35,7 +35,7 @@ defmodule RSMP do
       pid: pid,
       interval: interval,
       timer: nil,
-      status: %{1=>0},
+      status: %{1 => 0},
       plan: 1
     }
 
@@ -134,20 +134,30 @@ defmodule RSMP do
 
   # api
   def set_status(pid, component, module, code, value) do
-    # Send the server a :put "instruction"
     GenServer.call(pid, {:set_status, component, module, code, value})
+  end
+
+  def send_all_status(pid) do
+    GenServer.call(pid, {:send_all_status})
   end
 
   # server
   def handle_call({:set_status, component, module, code, value}, _from, state) do
     path = "#{component}/#{module}/#{code}"
     state = %{state | status: Map.put(state.status, path, value)}
-    publish_status(state,component, module, code)
+    publish_status(state, component, module, code)
     {:reply, :ok, state}
   end
 
-  def publish_status(state,component, module, code) do
+  def handle_call({:send_all_status}, _from, state) do
+    publish_all_status(state)
+    {:reply, :ok, state}
+  end
+
+  # internal
+  defp publish_status(state, component, module, code) do
     path = "#{component}/#{module}/#{code}"
+
     :emqtt.publish(
       # Client
       state.pid,
@@ -163,4 +173,19 @@ defmodule RSMP do
     )
   end
 
+  defp publish_all_status(state) do
+    :emqtt.publish(
+      # Client
+      state.pid,
+      # Topic
+      "status/#{state.id}/all",
+      # Properties
+      %{},
+      # Payload
+      :erlang.term_to_binary(state.status),
+      # Opts
+      retain: true,
+      qos: 1
+    )
+  end
 end
