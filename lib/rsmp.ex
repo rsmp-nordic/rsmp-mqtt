@@ -6,17 +6,19 @@ defmodule RSMP do
   require Logger
 
   def start_link([]) do
-    GenServer.start_link(__MODULE__, [])
+    {:ok, pid} = GenServer.start_link(__MODULE__, [])
+    Logger.info( "Starting RSMP with pid #{inspect(pid)}")
+    
+    # So you can do `:sys.get_state(RSMP)` in iex:
+    Process.register( pid, RSMP)
+
+    {:ok, pid}
   end
 
   def init([]) do
     interval = Application.get_env(:rsmp, :interval)
     emqtt_opts = Application.get_env(:rsmp, :emqtt)
     id = emqtt_opts[:clientid]
-    component = "main"
-    module = "system"
-    status = "temperature"
-    status_topic = "status/#{id}/#{component}/#{module}/#{status}"
 
     options =
       emqtt_opts ++
@@ -29,11 +31,12 @@ defmodule RSMP do
     {:ok, pid} = :emqtt.start_link(options)
 
     state = %{
+      id: id,
+      pid: pid,
       interval: interval,
       timer: nil,
-      status_topic: status_topic,
-      plan: 1,
-      pid: pid
+      status: %{1=>0},
+      plan: 1
     }
 
     {:ok, set_timer(state), {:continue, :start_emqtt}}
@@ -58,7 +61,7 @@ defmodule RSMP do
     {:noreply, state}
   end
 
-  def handle_info(:tick, %{status_topic: _topic, pid: _pid} = state) do
+  def handle_info(:tick, state) do
     # status_temperature(pid, topic)
     # {:noreply, set_timer(state)}
     {:noreply, state}
@@ -128,4 +131,36 @@ defmodule RSMP do
     timer = Process.send_after(self(), :tick, state.interval)
     %{state | timer: timer}
   end
+
+  # api
+  def set_status(pid, component, module, code, value) do
+    # Send the server a :put "instruction"
+    GenServer.call(pid, {:set_status, component, module, code, value})
+  end
+
+  # server
+  def handle_call({:set_status, component, module, code, value}, _from, state) do
+    path = "#{component}/#{module}/#{code}"
+    state = %{state | status: Map.put(state.status, path, value)}
+    publish_status(state,component, module, code)
+    {:reply, :ok, state}
+  end
+
+  def publish_status(state,component, module, code) do
+    path = "#{component}/#{module}/#{code}"
+    :emqtt.publish(
+      # Client
+      state.pid,
+      # Topic
+      "status/#{state.id}/#{path}",
+      # Properties
+      %{},
+      # Payload
+      :erlang.term_to_binary(state.status[path]),
+      # Opts
+      retain: true,
+      qos: 1
+    )
+  end
+
 end

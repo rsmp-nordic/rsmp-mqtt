@@ -9,3 +9,4 @@ config :rsmp, :emqtt,
   proto_ver: :v5
 
 config :rsmp, :interval, 1000
+config :logger, level: :info

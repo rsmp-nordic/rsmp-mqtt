@@ -56,3 +56,27 @@ If you get the error `Application rsmp exited: shutdown`, then please check that
 
 
 
+## Interacting
+You can interact with the RMSP client using `iex`, the interactive Elixir shell.
+
+```sh
+code/rsmp_mqtt (main) % iex -S mix
+Erlang/OTP 25 [erts-13.2.2.3] [source] [64-bit] [smp:4:4] [ds:4:4:10] [async-threads:1] [jit:ns]
+
+10:34:54.354 [info] Starting RSMP with pid #PID<0.190.0>
+Interactive Elixir (1.15.5) - press Ctrl+C to exit (type h() ENTER for help)
+
+iex(2)> rsmp = Process.whereis(RSMP)
+#PID<0.190.0>
+
+iex(3)> :sys.get_state(RSMP)        
+%{
+  interval: 1000,
+  pid: #PID<0.191.0>,
+  plan: 1,
+  status: %{1 => 0},
+  timer: #Reference<0.1086325504.2114453507.137317>
+}
+iex(4)> RSMP.set_status(rsmp,1,3)   
+:ok
+```
