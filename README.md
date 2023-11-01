@@ -16,12 +16,25 @@ emqtt is an Erlang MQTT library (Erlang can be used in Elixir).
 NOTE: The emqtt libriary is currently incompatible with the latest Erlang 26, see:
 https://github.com/emqx/emqtt/pull/196
 
-Instead you must install Erlang 25, and a version of Elixir is compiled with that OTP version. The easiest way to do this is to install Erlang and Elixir with asdf, see e.g:
-https://www.pluralsight.com/guides/installing-elixir-erlang-with-asdf
+Instead you must install Erlang 25, and a version of Elixir is compiled with that OTP version. The easiest way to do this is to install Erlang and Elixir with rtx, see e.g:
+https://github.com/jdx/rtx
+
+After installing rtx, you can install the correct version of Elixir and Erlang (which is specified in .tool-versions) with:
+
+```sh
+rtx install`
+```
+
+If you're on macOS 14 Sonoma, Erlang 25 does work unless you build if without JIT. You can do this with:
+
+```sh
+KERL_CONFIGURE_OPTIONS="--disable-jit" rtx install
+```
 
 If you downgrade an existing Erlang 26, you might need to remove all project dependencies and reinstall.
 
-To install dependencies (once elixir and erlang is installed):
+Once Elixir and Erlang are installed, you can install project dependencies with:
+
 ```sh
 % mix deps.get
 ```

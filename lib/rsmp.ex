@@ -128,11 +128,4 @@ defmodule RSMP do
     timer = Process.send_after(self(), :tick, state.interval)
     %{state | timer: timer}
   end
-
-  defp status_temperature(pid, topic) do
-    temperature = 10.0 + 2.0 * :rand.normal()
-    message = {System.system_time(:millisecond), temperature}
-    payload = :erlang.term_to_binary(message)
-    :emqtt.publish(pid, topic, payload)
-  end
 end
