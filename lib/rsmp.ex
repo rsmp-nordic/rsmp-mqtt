@@ -133,6 +133,8 @@ defmodule RSMP do
   end
 
   # api
+  # from iex:
+  # > Process.whereis(RSMP) |> RSMP.set_status("main","system",1,234)
   def set_status(pid, component, module, code, value) do
     GenServer.call(pid, {:set_status, component, module, code, value})
   end
